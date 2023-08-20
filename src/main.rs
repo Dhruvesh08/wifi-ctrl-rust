@@ -1,7 +1,7 @@
 use env_logger::Env;
 use log::{error, info};
 use wifi_ctrl::{sta::{self, ScanResult}, Result};
-mod wifi;
+// mod wifi;
 
 #[tokio::main]
 async fn main() -> Result {
