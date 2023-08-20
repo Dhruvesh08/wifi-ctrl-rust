@@ -30,7 +30,8 @@ async fn main() -> Result {
     
     );
 
-    print!("Scan results: {:?}", app);
+    let wifi_list = app.unwrap();
+    println!("wifi_list: {:?}", wifi_list);
 
 
     Ok(())
