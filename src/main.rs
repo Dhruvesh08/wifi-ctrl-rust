@@ -1,6 +1,7 @@
 use env_logger::Env;
 use log::{error, info};
-use wifi_ctrl::{sta, Result};
+use wifi_ctrl::{sta::{self, ScanResult}, Result};
+mod wifi;
 
 #[tokio::main]
 async fn main() -> Result {
@@ -18,7 +19,7 @@ async fn main() -> Result {
     let runtime = setup.complete();
   
 
-    let (_runtime, _app,_broadcast ) = tokio::join!(
+    let (_runtime, app,_broadcast ) = tokio::join!(
         async move {
             if let Err(e) = runtime.run().await {
                 error!("Error: {e}");
@@ -28,25 +29,24 @@ async fn main() -> Result {
         broadcast_listener(broadcast),
     
     );
+
+    print!("Scan results: {:?}", app);
+
+
     Ok(())
 }
 
-async fn app(requester: sta::RequestClient) -> Result {
+async fn app(requester: sta::RequestClient) -> Result<Vec<ScanResult>> {
     info!("Requesting scan");
     let scan = requester.get_scan().await?;
     info!("Scan complete");
-    for scan in scan.iter() {
-        info!("   {:?}", scan);
-    }
+    // for scan in scan.iter() {
+    //     info!("   {:?}", scan);
+    // }
 
-    let networks = requester.get_networks().await?;
-    info!("Known networks");
-    for networks in networks.iter() {
-        info!("   {:?}", networks);
-    }
     info!("Shutting down");
     requester.shutdown().await?;
-    Ok(())
+    Ok(scan.to_vec())
 }
 
 
