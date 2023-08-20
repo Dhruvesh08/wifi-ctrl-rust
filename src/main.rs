@@ -13,16 +13,19 @@ async fn main() -> Result {
 
     setup.set_socket_path(proposed_path);
 
+    let broadcast = setup.get_broadcast_receiver();
     let requester = setup.get_request_client();
     let runtime = setup.complete();
+  
 
-    let (_runtime, _app, ) = tokio::join!(
+    let (_runtime, _app,_broadcast ) = tokio::join!(
         async move {
             if let Err(e) = runtime.run().await {
                 error!("Error: {e}");
             }
         },
         app(requester),
+        broadcast_listener(broadcast),
     
     );
     Ok(())
@@ -46,6 +49,13 @@ async fn app(requester: sta::RequestClient) -> Result {
     Ok(())
 }
 
+
+async fn broadcast_listener(mut broadcast_receiver: sta::BroadcastReceiver) -> Result {
+    while let Ok(broadcast) = broadcast_receiver.recv().await {
+        info!("Broadcast: {:?}", broadcast);
+    }
+    Ok(())
+}
 
 
 
